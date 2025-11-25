@@ -1,10 +1,12 @@
 streamlit
 pandas
-altair
 yfinance
-requests
-beautifulsoup4
-langchain
 faiss-cpu
-openai
+beautifulsoup4
+reportlab
 python-dotenv
+requests
+altair
+langchain
+langchain-openai
+langchain-community
