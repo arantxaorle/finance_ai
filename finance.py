@@ -37,7 +37,6 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-
 def safe_execute(conn, query, params=()):
     """Thin wrapper around cursor.execute with basic error logging."""
     try:
@@ -49,7 +48,6 @@ def safe_execute(conn, query, params=()):
         logging.error("Database error: %s", e)
         st.error(f"Database error: {e}")
         return None
-
 
 # ------------------ SETUP ------------------
 st.set_page_config(page_title="💼 Finance & Investment Agent", layout="wide")
@@ -63,8 +61,6 @@ FAISS_DIR = Path("faiss_index")
 FAISS_DIR.mkdir(exist_ok=True)
 
 # ------------------ DATABASE ------------------
-
-
 def init_db():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     safe_execute(conn, """CREATE TABLE IF NOT EXISTS incomes (
@@ -94,21 +90,15 @@ def init_db():
     return conn
 
 # ------------------ DATA HELPERS ------------------
-
-
 def get_incomes(conn):
     df = pd.read_sql_query("SELECT * FROM incomes ORDER BY date DESC", conn)
-    if not df.empty:
-        df['date'] = pd.to_datetime(df['date'])
+    if not df.empty: df['date'] = pd.to_datetime(df['date'])
     return df
-
 
 def get_expenses(conn):
     df = pd.read_sql_query("SELECT * FROM expenses ORDER BY date DESC", conn)
-    if not df.empty:
-        df['date'] = pd.to_datetime(df['date'])
+    if not df.empty: df['date'] = pd.to_datetime(df['date'])
     return df
-
 
 def compute_summary(incomes, expenses):
     ti = incomes['amount'].sum() if not incomes.empty else 0
@@ -118,7 +108,6 @@ def compute_summary(incomes, expenses):
     return ti, te, sav, rate
 
 # ------------------ INVESTMENT FUNCTIONS ------------------
-
 def fetch_price(symbol):
     if not symbol or not symbol.strip():
         return None
@@ -132,7 +121,6 @@ def fetch_price(symbol):
         logging.error("Error fetching price for %s: %s", symbol, e)
         return None
 
-
 def get_historical_return(symbol, period="1y"):
     if not symbol or not symbol.strip():
         return None
@@ -140,14 +128,12 @@ def get_historical_return(symbol, period="1y"):
         data = yf.Ticker(symbol.strip()).history(period=period)
         if data.empty or len(data["Close"]) < 2:
             return None
-        start, end = float(data["Close"].iloc[0]), float(
-            data["Close"].iloc[-1])
+        start, end = float(data["Close"].iloc[0]), float(data["Close"].iloc[-1])
         pct = (end - start) / start * 100
         return {"start": start, "end": end, "pct_return": pct}
     except Exception as e:
         logging.error("Error fetching historical return for %s: %s", symbol, e)
         return None
-
 
 def fetch_financial_news(symbols):
     news = {}
@@ -167,8 +153,7 @@ def fetch_financial_news(symbols):
                 href = a.get("href")
                 if not title or not href:
                     continue
-                full_url = href if href.startswith(
-                    "http") else f"https://finance.yahoo.com{href}"
+                full_url = href if href.startswith("http") else f"https://finance.yahoo.com{href}"
                 items.append((title, full_url))
                 if len(items) >= 3:
                     break
@@ -179,24 +164,19 @@ def fetch_financial_news(symbols):
     return news
 
 # ------------------ RAG SETUP ------------------
-
-
 @st.cache_resource(show_spinner=False)
 def load_rag_model(kb_path, openai_api_key):
     if not kb_path.exists():
         with open(kb_path, "w", encoding="utf-8") as f:
-            f.write(
-                "Investing basics:\n- Diversify assets\n- Long-term investing beats timing\n- Dollar-cost averaging.\n")
+            f.write("Investing basics:\n- Diversify assets\n- Long-term investing beats timing\n- Dollar-cost averaging.\n")
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     loader = RecursiveCharacterTextSplitter(chunk_size=600, chunk_overlap=80)
     text = Path(kb_path).read_text()
     chunks = loader.split_text(text)
     vs = FAISS.from_texts(chunks, embeddings)
     retriever = vs.as_retriever(search_kwargs={"k": 2})
-    llm = ChatOpenAI(
-        model="gpt-4", openai_api_key=openai_api_key, temperature=0.2)
+    llm = ChatOpenAI(model="gpt-4", openai_api_key=openai_api_key, temperature=0.2)
     return RetrievalQA.from_chain_type(llm, retriever=retriever, return_source_documents=True)
-
 
 rag_chain = load_rag_model(KB_PATH, OPENAI_API_KEY) if OPENAI_API_KEY else None
 
@@ -206,10 +186,10 @@ page = st.sidebar.radio("Select", [
     "🏠 Dashboard",
     "💰 Add Income/Expense",
     "🎯 Goals",
-    "💼 Budgets",
+    "💼 Budgets", 
     "📊 Investments",
     "🤖 AI Advisor",
-    "📝 Manage Data",
+    "📝 Manage Data", 
 ])
 
 conn = init_db()
@@ -244,8 +224,7 @@ elif page == "💰 Add Income/Expense":
     ttype = st.radio("Type", ["Income", "Expense"])
     amount = st.number_input("Amount", min_value=0.0, step=10.0)
     desc = st.text_input("Description / Source")
-    cat = st.selectbox("Category", ["Housing", "Groceries", "Transport",
-                       "Dining", "Utilities", "Entertainment", "Healthcare", "Other"])
+    cat = st.selectbox("Category", ["Housing","Groceries","Transport","Dining","Utilities","Entertainment","Healthcare","Other"])
     d = st.date_input("Date", today)
 
     if st.button("Save"):
@@ -292,8 +271,7 @@ elif page == "🎯 Goals":
 
 elif page == "📊 Investments":
     st.title("📊 Investment Dashboard")
-    symbols = st.text_input("Enter stock symbols (comma separated)",
-                            "AAPL,MSFT,GOOGL,SPY").upper().split(",")
+    symbols = st.text_input("Enter stock symbols (comma separated)", "AAPL,MSFT,GOOGL,SPY").upper().split(",")
     symbols = [s.strip() for s in symbols if s.strip()]
 
     cols = st.columns(min(5, len(symbols)))
@@ -301,19 +279,17 @@ elif page == "📊 Investments":
         with cols[i % len(cols)]:
             price = fetch_price(sym)
             if price is None:
-                st.warning(
-                    f"Could not fetch price for {sym}. Check the symbol or try again later.")
+                st.warning(f"Could not fetch price for {sym}. Check the symbol or try again later.")
             else:
                 st.metric(sym, f"${price:,.2f}")
 
     st.subheader("📈 Historical Returns")
     sym = st.selectbox("Select symbol", symbols)
-    period = st.selectbox("Period", ["1mo", "3mo", "6mo", "1y", "5y"], index=3)
+    period = st.selectbox("Period", ["1mo","3mo","6mo","1y","5y"], index=3)
     if st.button("Calculate Return"):
         res = get_historical_return(sym, period)
         if res:
-            st.success(
-                f"{sym} Return ({period}): {res['pct_return']:.2f}% (${res['start']:.2f} → ${res['end']:.2f})")
+            st.success(f"{sym} Return ({period}): {res['pct_return']:.2f}% (${res['start']:.2f} → ${res['end']:.2f})")
 
     st.subheader("📰 Financial News")
     if st.button("Fetch Latest News"):
@@ -411,8 +387,7 @@ elif page == "💼 Budgets":
         over = merged[merged["remaining"] < 0]
         if not over.empty:
             st.warning(
-                "You are over budget in: " +
-                ", ".join(over["category"].tolist())
+                "You are over budget in: " + ", ".join(over["category"].tolist())
             )
 
 
@@ -428,8 +403,7 @@ elif page == "📝 Manage Data":
     # ---- Incomes ----
     with tab1:
         st.subheader("Incomes")
-        df_inc = pd.read_sql_query(
-            "SELECT * FROM incomes ORDER BY date DESC", conn)
+        df_inc = pd.read_sql_query("SELECT * FROM incomes ORDER BY date DESC", conn)
         if df_inc.empty:
             st.info("No incomes recorded yet.")
         else:
@@ -475,8 +449,7 @@ elif page == "📝 Manage Data":
 
             if delete_btn:
                 try:
-                    cur.execute("DELETE FROM incomes WHERE id = ?",
-                                (int(selected_id),))
+                    cur.execute("DELETE FROM incomes WHERE id = ?", (int(selected_id),))
                     conn.commit()
                     st.warning("Income deleted.")
                     st.experimental_rerun()
@@ -486,8 +459,7 @@ elif page == "📝 Manage Data":
     # ---- Expenses ----
     with tab2:
         st.subheader("Expenses")
-        df_exp = pd.read_sql_query(
-            "SELECT * FROM expenses ORDER BY date DESC", conn)
+        df_exp = pd.read_sql_query("SELECT * FROM expenses ORDER BY date DESC", conn)
         if df_exp.empty:
             st.info("No expenses recorded yet.")
         else:
@@ -503,8 +475,7 @@ elif page == "📝 Manage Data":
                 new_date = st.date_input(
                     "Date", value=date.fromisoformat(erow["date"])
                 )
-                new_category = st.text_input(
-                    "Category", value=erow["category"])
+                new_category = st.text_input("Category", value=erow["category"])
                 new_description = st.text_input(
                     "Description", value=erow.get("description", "")
                 )
@@ -534,6 +505,7 @@ elif page == "📝 Manage Data":
                 if res is not None:
                     st.success("Expense updated.")
                     st.experimental_rerun()
+            
 
             if delete_btn_e:
                 res = safe_execute(
