@@ -1,0 +1,10 @@
+streamlit
+pandas
+altair
+yfinance
+requests
+beautifulsoup4
+langchain
+faiss-cpu
+openai
+python-dotenv
