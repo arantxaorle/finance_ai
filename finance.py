@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
+from langchain_classic.chains.retrieval_qa.base import RetrievalQA
 from dotenv import load_dotenv
 from pathlib import Path
 from io import StringIO

@@ -10,3 +10,4 @@ altair
 langchain
 langchain-openai
 langchain-community
+langchain-text-splitters
