@@ -24,10 +24,11 @@ import yfinance as yf
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain_community.vectorstores import FAISS
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
 from dotenv import load_dotenv
 from pathlib import Path
 from io import StringIO
