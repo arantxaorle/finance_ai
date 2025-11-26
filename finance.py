@@ -24,11 +24,12 @@ import yfinance as yf
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 from pathlib import Path
 from io import StringIO
@@ -239,10 +240,22 @@ def load_retriever(kb_path, openai_api_key):
     text = Path(kb_path).read_text()
     chunks = splitter.split_text(text)
     vs = FAISS.from_texts(chunks, embeddings)
-    retriever = vs.as_retriever(search_kwargs={"k": 2})
-    return retriever
+    retriever = vs.as_retriever()
 
-retriever = load_retriever(KB_PATH, OPENAI_API_KEY) if OPENAI_API_KEY else None
+    prompt = ChatPromptTemplate.from_template(
+        "You are a financial advisor. Use the following context:\n{context}\n\nQuestion: {input}"
+    )
+
+    llm = ChatOpenAI(api_key=openai_api_key, model="gpt-4o-mini")
+
+    doc_chain = create_stuff_documents_chain(llm, prompt)
+    rag = create_retrieval_chain(retriever, doc_chain)
+
+    result = rag.invoke({"input": query})
+    answer = result["answer"]
+    sources = result["context"]
+
+    retriever = load_retriever(KB_PATH, OPENAI_API_KEY) if OPENAI_API_KEY else None
 
 # ------------------ UI ------------------
 st.sidebar.title("📚 Navigation")

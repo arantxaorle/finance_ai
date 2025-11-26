@@ -2,16 +2,17 @@ streamlit
 pandas
 altair
 yfinance
-requests
 beautifulsoup4
+requests
 faiss-cpu
 python-dotenv
 openai
+
+# Choose ONE LangChain ecosystem — we pick the modern one
+langchain>=0.2.0
+langchain-community>=0.2.0
+langchain-openai>=0.2.0
+langchain-text-splitters>=0.2.0
+
+# Ensure tokenizer works locally (tiktoken)
 tiktoken
-transformers
-
-# LangChain old-style imports
-langchain<0.1.0
-
-# ✅ Make LangChain happy: use Pydantic v1
-pydantic<2.0.0
