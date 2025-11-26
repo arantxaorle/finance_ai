@@ -2,11 +2,11 @@ streamlit
 pandas
 altair
 yfinance
-beautifulsoup4
 requests
-faiss-cpu
+beautifulsoup4
 python-dotenv
 openai
+tiktoken
 
 faiss-cpu==1.7.4
 
