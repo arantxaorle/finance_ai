@@ -234,7 +234,7 @@ def load_retriever(kb_path, openai_api_key):
                 "- Long-term investing beats timing\n"
                 "- Dollar-cost averaging.\n"
             )
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key, tiktoken_enabled=False,)
     splitter = RecursiveCharacterTextSplitter(chunk_size=600, chunk_overlap=80)
     text = Path(kb_path).read_text()
     chunks = splitter.split_text(text)

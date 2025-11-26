@@ -7,6 +7,8 @@ beautifulsoup4
 faiss-cpu
 python-dotenv
 openai
+tiktoken
+transformers
 
 # LangChain old-style imports
 langchain<0.1.0
