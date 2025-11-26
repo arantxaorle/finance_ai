@@ -1,14 +1,15 @@
 streamlit
 pandas
+altair
 yfinance
-faiss-cpu
+requests
 beautifulsoup4
-reportlab
+faiss-cpu
 python-dotenv
 openai
 
-# LangChain ecosystem (versions are examples, pin them as you prefer)
+# LangChain old-style imports
 langchain<0.1.0
-langchain-openai>=0.1.0
-langchain-community>=0.2.0
-langchain-text-splitters>=0.2.0
+
+# ✅ Make LangChain happy: use Pydantic v1
+pydantic<2.0.0
