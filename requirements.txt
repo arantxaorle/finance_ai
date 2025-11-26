@@ -8,11 +8,8 @@ faiss-cpu
 python-dotenv
 openai
 
-# Choose ONE LangChain ecosystem — we pick the modern one
-langchain>=0.2.0
-langchain-community>=0.2.0
-langchain-openai>=0.2.0
-langchain-text-splitters>=0.2.0
-
-# Ensure tokenizer works locally (tiktoken)
+langchain==0.2.14
+langchain-community==0.2.13
+langchain-openai==0.1.7
+langchain-text-splitters==0.2.1
 tiktoken
